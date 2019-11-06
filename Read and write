@@ -1,0 +1,74 @@
+        public void Write()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand("sp_InsertProcName", connection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+
+                    sqlCommand.Parameters.Add(new SqlParameter("@CustomerName", SqlDbType.NVarChar, 40));
+                    sqlCommand.Parameters["@CustomerName"].Value = "Jitendra";
+                    // Add the output parameter.
+                    sqlCommand.Parameters.Add(new SqlParameter("@CustomerID", SqlDbType.Int));
+                    sqlCommand.Parameters["@CustomerID"].Direction = ParameterDirection.Output;
+                    try
+                    {
+                        connection.Open();
+                        sqlCommand.ExecuteNonQuery();
+                        var Out = (int)sqlCommand.Parameters["@CustomerID"].Value;
+
+                    }
+                    catch
+                    {
+                        //LogException
+
+                            
+
+                    }
+                    finally
+                    {
+                        connection.Close();
+                    }
+                }
+            }
+        }
+
+        public void Read()
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                using (SqlCommand sqlCommand = new SqlCommand("sp_RetriveProcName", connection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.Add(new SqlParameter("@orderID", SqlDbType.Int));
+                    sqlCommand.Parameters["@orderID"].Value = "1";
+                    try
+                    {
+                        connection.Open();
+                        using (SqlDataReader dataReader = sqlCommand.ExecuteReader())
+                        {
+                            DataTable dataTable = new DataTable();
+                            dataTable.Load(dataReader);
+                           foreach(DataRow row in  dataTable.Rows)
+                            {
+                                string name = row["name"].ToString();
+                                string description = row["description"].ToString();
+                            }
+                            dataReader.Close();
+                        }
+                    }
+                    catch
+                    {
+                        //LogException
+                    }
+                    finally
+                    {
+                        // Close the connection.
+                        connection.Close();
+                    }
+
+                }
+            }
+        }
